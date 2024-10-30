@@ -1,138 +1,139 @@
 import { config } from '../utils/config'
 import { injectButtons } from './injectButtons'
 
-console.info('contentScript is running')
-
-// contentScript.js
 function injectTicketManager() {
-  if (location.href !== config.CRM_TICKETS_PAGE) {
-    return
-  }
-  const daysWithoutReplyThresholds = { yellow: 2, orange: 5 }
+  if (location.href !== config.CRM_TICKETS_PAGE) return
+
+  const daysWithoutReplyThresholds = { yellow: 2, orange: 5, red: 7 }
   const styleSheet = document.createElement('style')
   styleSheet.textContent = `
-    /* Modern table styles */
+    /* Modern container styles */
     .has-row-options {
-        transition: all 0.2s ease-in-out !important;
-        border-radius: 8px !important;
-        margin: 8px 0 !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        background: #fff !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 12px !important;
+        margin: 12px 0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(0,0,0,0.06) !important;
     }
 
     .has-row-options:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.08) !important;
     }
 
     .has-row-options td {
-        padding: 16px 12px !important;
+        padding: 18px 16px !important;
         vertical-align: middle !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+        color: #1F2937 !important;
     }
 
-    /* Status badge styles */
+    /* Enhanced status badge */
     .ticket-status-1 {
-        display: inline-block !important;
-        padding: 6px 12px !important;
-        border-radius: 20px !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        background-color: #E8F5E9 !important;
-        color: #2E7D32 !important;
-    }
-
-    /* Priority indicator */
-    .priority-indicator {
-        width: 8px !important;
-        height: 8px !important;
-        border-radius: 50% !important;
-        display: inline-block !important;
-        margin-right: 8px !important;
-    }
-
-    .priority-high { background-color: #EF5350 !important; }
-    .priority-medium { background-color: #FFA726 !important; }
-    .priority-low { background-color: #66BB6A !important; }
-
-    /* Assignee name card */
-    .assignee-name {
-        background: #fff !important;
-        border: 1px solid #E0E0E0 !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        margin-top: 8px !important;
-        font-size: 13px !important;
-        color: #424242 !important;
-        display: flex !important;
+        display: inline-flex !important;
         align-items: center !important;
-        gap: 8px !important;
+        padding: 6px 14px !important;
+        border-radius: 24px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.6px !important;
+        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%) !important;
+        color: #1B5E20 !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
 
-    .assignee-avatar {
-        width: 24px !important;
-        height: 24px !important;
+    /* Modern priority indicators */
+    .priority-indicator {
+        width: 10px !important;
+        height: 10px !important;
         border-radius: 50% !important;
-        background: #F5F5F5 !important;
+        display: inline-block !important;
+        margin-right: 10px !important;
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.8) !important;
+    }
+
+    .priority-high { background: linear-gradient(135deg, #FF5252 0%, #F44336 100%) !important; }
+    .priority-medium { background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%) !important; }
+    .priority-low { background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%) !important; }
+
+    /* Refined assignee card */
+    .assignee-name {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        margin-top: 8px !important;
+        font-size: 13px !important;
+        color: #334155 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
+    }
+
+    .assignee-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        font-size: 12px !important;
-        color: #757575 !important;
-        font-weight: 500 !important;
+        font-size: 13px !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
 
-    /* Days badge */
+    /* Enhanced days badge */
     .days-badge {
         display: inline-flex !important;
         align-items: center !important;
-        padding: 4px 8px !important;
-        border-radius: 6px !important;
+        padding: 6px 12px !important;
+        border-radius: 8px !important;
         font-size: 12px !important;
-        font-weight: 500 !important;
-        gap: 4px !important;
+        font-weight: 600 !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
 
-    .days-badge::before {
-        content: '⏱️' !important;
-        font-size: 12px !important;
+    .days-badge.warning {
+        background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%) !important;
+        color: #E65100 !important;
     }
 
-    /* Category tags */
+    .days-badge.danger {
+        background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%) !important;
+        color: #C62828 !important;
+    }
+
+    /* Modern category tags */
     .ticket-category {
         display: inline-flex !important;
         align-items: center !important;
-        padding: 6px 12px !important;
-        border-radius: 6px !important;
+        padding: 8px 14px !important;
+        border-radius: 8px !important;
         font-size: 12px !important;
-        font-weight: 500 !important;
-        background: #F5F5F5 !important;
-        color: #616161 !important;
-    }
-
-    /* Hover effects for interactive elements */
-    .clickable {
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-    }
-
-    .clickable:hover {
-        opacity: 0.8 !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%) !important;
+        color: #374151 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
 `
+
   document.head.appendChild(styleSheet)
 
-  // Rest of the helper functions remain the same
+  // Existing helper functions remain unchanged
   function calculateDaysBetween(date1, date2) {
     const differenceInTime = date2.getTime() - date1.getTime()
     return differenceInTime / (1000 * 3600 * 24)
   }
 
   function parseCustomDate(dateString) {
-    if (!dateString || !dateString.includes(' ')) {
-      return NaN
-    }
+    if (!dateString || !dateString.includes(' ')) return NaN
 
     const [datePart, timePart] = dateString.split(' ')
     const [day, month, year] = datePart.split('-').map(Number)
@@ -144,7 +145,6 @@ function injectTicketManager() {
 
     return new Date(year, month - 1, day, hour, minute)
   }
-
   function getAssigneeName(row) {
     const nameExtractors = [
       (row) => row.querySelector('.name-tag, .assignee-tag, .user-tag')?.textContent?.trim(),
@@ -182,27 +182,23 @@ function injectTicketManager() {
     return null
   }
 
-  // Updated color palette with more modern colors
+  // Updated color palette
   const colors = {
     yellow: '#FFF8E1',
     orange: '#FFE0B2',
     red: '#FFEBEE',
-    bugFixRed: '#FFEBEE',
+    bugFixRed: '#FDE7E7',
     customizationOrange: '#FFF3E0',
     deadlineRed: '#FFEBEE',
     noReplyYet: '#F3E5F5',
   }
 
-  // Remove existing elements
   document.querySelectorAll('.days-badge, .assignee-name').forEach((element) => element.remove())
 
   const today = new Date()
   const ticketRows = document.querySelectorAll('.has-row-options') as NodeListOf<HTMLElement>
-  let flaggedTicketsCount = 0
-  let nameDetectionStats = { success: 0, failed: 0 }
 
   ticketRows.forEach((row) => {
-    // Add modern hover effect to rows
     row.classList.add('clickable')
 
     const categoryElement = row.querySelector('td:nth-last-child(1)')
@@ -225,8 +221,7 @@ function injectTicketManager() {
       })
       return
     }
-
-    const lastReplyElement = row.querySelector('td:nth-child(10)') as HTMLElement
+    const lastReplyElement = row.querySelector('td:nth-child(10)')
     if (lastReplyElement) {
       const lastReplyText = lastReplyElement.textContent?.trim()
       if (lastReplyText && lastReplyText !== 'No Reply Yet') {
@@ -235,12 +230,16 @@ function injectTicketManager() {
           const daysWithoutReply = Math.floor(calculateDaysBetween(lastReplyDate, today))
 
           let color = ''
-          if (daysWithoutReply <= daysWithoutReplyThresholds.yellow) {
-            color = colors.yellow
-          } else if (daysWithoutReply <= daysWithoutReplyThresholds.orange) {
+          let badgeClass = ''
+
+          if (daysWithoutReply > daysWithoutReplyThresholds.orange) {
+            color = colors.red
+            badgeClass = 'danger'
+          } else if (daysWithoutReply > daysWithoutReplyThresholds.yellow) {
             color = colors.orange
+            badgeClass = 'warning'
           } else {
-            color = ''
+            color = colors.yellow
           }
 
           if (color) {
@@ -249,27 +248,10 @@ function injectTicketManager() {
             row.querySelectorAll('td').forEach((cell) => {
               cell.style.backgroundColor = color
             })
-            flaggedTicketsCount++
-
-            const existingBadge = lastReplyElement.querySelector('.days-badge')
-            if (existingBadge) {
-              existingBadge.remove()
-            }
 
             const badge = document.createElement('span')
-            badge.className = 'days-badge'
+            badge.className = `days-badge ${badgeClass}`
             badge.textContent = `${daysWithoutReply} days`
-            badge.style.padding = '3px 8px'
-            badge.style.marginLeft = '8px'
-            badge.style.color = '#6b4e16'
-            badge.style.fontSize = '12px'
-            badge.style.backgroundColor = color
-            badge.style.border = '1px solid #6b4e16'
-            badge.style.borderRadius = '6px'
-            badge.style.fontWeight = '500'
-            badge.style.verticalAlign = 'middle'
-            badge.style.display = 'inline-block'
-
             lastReplyElement.appendChild(badge)
           }
         }
@@ -279,10 +261,10 @@ function injectTicketManager() {
         row.querySelectorAll('td').forEach((cell) => {
           cell.style.backgroundColor = colors.noReplyYet
         })
-        lastReplyElement.style.color = '#6b4e16'
       }
     }
 
+    // Rest of the existing functionality remains unchanged
     // Status enhancement
     const statusElement = row.querySelector('.ticket-status-1')
     if (!statusElement?.textContent) {
@@ -290,14 +272,13 @@ function injectTicketManager() {
     }
     const status = statusElement.textContent.trim().toLowerCase()
     statusElement.innerHTML = `
-          <span class="priority-indicator priority-${status === 'high' ? 'high' : status === 'medium' ? 'medium' : 'low'}"></span>
-          ${status.toUpperCase()}
-      `
+        <span class="priority-indicator priority-${status === 'high' ? 'high' : status === 'medium' ? 'medium' : 'low'}"></span>
+        ${status.toUpperCase()}
+    `
 
     // Assignee name enhancement
     const assigneeName = getAssigneeName(row)
     if (assigneeName) {
-      nameDetectionStats.success++
       const initials = assigneeName
         .split(' ')
         .map((n) => n[0])
@@ -307,9 +288,9 @@ function injectTicketManager() {
       const assigneeNameElement = document.createElement('div')
       assigneeNameElement.className = 'assignee-name clickable'
       assigneeNameElement.innerHTML = `
-            <div class="assignee-avatar">${initials}</div>
-            ${assigneeName}
-        `
+          <div class="assignee-avatar">${initials}</div>
+          ${assigneeName}
+      `
 
       const container =
         row.querySelector('a[title]')?.parentNode ||
@@ -319,16 +300,10 @@ function injectTicketManager() {
       if (container) {
         container.appendChild(assigneeNameElement)
       }
-    } else {
-      nameDetectionStats.failed++
     }
-
-    // Enhanced days badge
   })
 
   injectButtons()
 }
-
-// Make sure to update your popup.js to call this function
 
 injectTicketManager()

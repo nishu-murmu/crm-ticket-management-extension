@@ -30,6 +30,10 @@ export default defineManifest({
       matches: ['http://*/*', 'https://*/*'],
       js: ['src/contentScript/index.ts'],
     },
+    {
+      matches: ['https://crm.enacton.com/admin/tickets/ticket/*'],
+      js: ['src/contentScript/blackbox.ts'],
+    },
   ],
   side_panel: {
     default_path: 'sidepanel.html',
@@ -43,7 +47,7 @@ export default defineManifest({
         'img/logo-128.png',
         'src/styles/output.css',
       ],
-      matches: [],
+      matches: ['https://crm.enacton.com/*'],
     },
   ],
   permissions: ['sidePanel', 'storage', 'tabs', 'activeTab', 'scripting'],
